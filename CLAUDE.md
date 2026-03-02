@@ -136,6 +136,7 @@ Empty for MVP.
 
 ## Constraints
 
+- `.idea/` must always be in `.gitignore`. Never commit IDE config files.
 - No Redux. Use React state + server actions.
 - Keep it simple and production-like.
 - Write real code, not pseudocode.
