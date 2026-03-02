@@ -11,17 +11,13 @@ model Topic {
   id        String   @id @default(cuid())
   userId    String
   title     String
-  parentId  String?
   order     Int      @default(0)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  parent   Topic?  @relation("TopicTree", fields: [parentId], references: [id], onDelete: Cascade)
-  children Topic[] @relation("TopicTree")
-  habits   Habit[]
+  habits Habit[]
 
   @@index([userId])
-  @@index([parentId])
 }
 
 enum HabitLogStatus {

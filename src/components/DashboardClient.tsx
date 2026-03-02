@@ -15,7 +15,7 @@ import {
 } from "@/lib/week";
 import type { TopicNode, HabitData } from "@/lib/types";
 
-const STORAGE_KEY = "track-my-habit-selected";
+const STORAGE_KEY = "track-my-habit-selected-habits";
 
 function loadSelected(): Set<string> {
   if (typeof window === "undefined") return new Set();
@@ -35,19 +35,19 @@ interface DashboardClientProps {
 }
 
 export function DashboardClient({ topics }: DashboardClientProps) {
-  const [selectedIds, setSelectedIds] = useState<Set<string>>(loadSelected);
+  const [selectedHabitIds, setSelectedHabitIds] = useState<Set<string>>(loadSelected);
   const [weekStart, setWeekStart] = useState(() => getWeekStart(new Date()));
   const [habits, setHabits] = useState<HabitData[]>([]);
   const [loading, setLoading] = useState(false);
 
   // Persist selection
   useEffect(() => {
-    saveSelected(selectedIds);
-  }, [selectedIds]);
+    saveSelected(selectedHabitIds);
+  }, [selectedHabitIds]);
 
   // Fetch habits when selection or week changes
   const fetchHabits = useCallback(async () => {
-    const ids = [...selectedIds];
+    const ids = [...selectedHabitIds];
     if (ids.length === 0) {
       setHabits([]);
       return;
@@ -61,53 +61,38 @@ export function DashboardClient({ topics }: DashboardClientProps) {
     } finally {
       setLoading(false);
     }
-  }, [selectedIds, weekStart]);
+  }, [selectedHabitIds, weekStart]);
 
   useEffect(() => {
     fetchHabits();
   }, [fetchHabits]);
 
-  function handleToggleSubtopic(subtopicId: string) {
-    setSelectedIds((prev) => {
+  function handleToggleHabit(habitId: string) {
+    setSelectedHabitIds((prev) => {
       const next = new Set(prev);
-      if (next.has(subtopicId)) next.delete(subtopicId);
-      else next.add(subtopicId);
+      if (next.has(habitId)) next.delete(habitId);
+      else next.add(habitId);
       return next;
     });
   }
 
-  function handleToggleTopic(_topicId: string, childIds: string[]) {
-    setSelectedIds((prev) => {
-      const next = new Set(prev);
-      const allSelected = childIds.every((id) => next.has(id));
-      if (allSelected) {
-        childIds.forEach((id) => next.delete(id));
-      } else {
-        childIds.forEach((id) => next.add(id));
-      }
-      return next;
-    });
-  }
-
-  // Build sections for the grid
-  const subtopicMap = new Map<string, TopicNode>();
+  // Build sections grouped by topic, only including selected habits
+  const topicMap = new Map<string, TopicNode>();
   for (const topic of topics) {
-    for (const child of topic.children) {
-      subtopicMap.set(child.id, child);
+    topicMap.set(topic.id, topic);
+  }
+
+  const sections: { id: string; title: string; habits: HabitData[] }[] = [];
+  for (const topic of topics) {
+    const topicHabits = habits.filter((h) => h.topicId === topic.id);
+    if (topicHabits.length > 0) {
+      sections.push({
+        id: topic.id,
+        title: topic.title,
+        habits: topicHabits,
+      });
     }
   }
-
-  const sections = [...selectedIds]
-    .map((id) => {
-      const subtopic = subtopicMap.get(id);
-      if (!subtopic) return null;
-      return {
-        id: subtopic.id,
-        title: subtopic.title,
-        habits: habits.filter((h) => h.topicId === subtopic.id),
-      };
-    })
-    .filter(Boolean) as { id: string; title: string; habits: HabitData[] }[];
 
   return (
     <div className="flex h-screen">
@@ -117,9 +102,8 @@ export function DashboardClient({ topics }: DashboardClientProps) {
           <div className="p-4">
             <TopicTree
               topics={topics}
-              selectedIds={selectedIds}
-              onToggleSubtopic={handleToggleSubtopic}
-              onToggleTopic={handleToggleTopic}
+              selectedHabitIds={selectedHabitIds}
+              onToggleHabit={handleToggleHabit}
             />
           </div>
         </ScrollArea>

@@ -1,9 +1,9 @@
-import { getTopicsTree } from "@/app/actions/topics";
+import { getTopics } from "@/app/actions/topics";
 import { DashboardClient } from "@/components/DashboardClient";
 import { UserButton } from "@clerk/nextjs";
 
 export default async function DashboardPage() {
-  const topics = await getTopicsTree();
+  const topics = await getTopics();
 
   return (
     <div className="relative">

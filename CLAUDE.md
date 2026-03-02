@@ -14,19 +14,17 @@ You are a senior full-stack engineer. Build an MVP web app called "Track My Habi
 
 Layout has 3 zones:
 
-### 1) Left Sidebar: Topics Tree
+### 1) Left Sidebar: Topics List
 
-- Topics can have nested subtopics. Each node has a checkbox to select/unselect.
-- Selecting a **TOPIC** selects all its subtopics.
-- Selecting a **SUBTOPIC** selects only that subtopic.
-- The "selected subtopics" state is UI-only (keep it in localStorage and also reflect in URL query param if easy).
+- Flat list of topics (no nesting). Each topic has a checkbox to select/unselect.
+- The "selected topics" state is UI-only (keep it in localStorage and also reflect in URL query param if easy).
 
 ### 2) Center: Habit Weekly Grid
 
-For each selected SUBTOPIC render a section/card:
+For each selected TOPIC render a section/card:
 
-- Title of subtopic
-- Weekly grid: columns Mon–Sun, rows = habits under that subtopic.
+- Title of topic
+- Weekly grid: columns Mon–Sun, rows = habits under that topic.
 - Each cell represents that habit's status for that day.
 - User can click a cell to toggle Done/Empty.
 - Some days are disabled per habit schedule (e.g., weekend off). Disabled cells are not clickable and have a muted style.
@@ -37,12 +35,11 @@ Empty for MVP.
 
 ## Functional Requirements (MVP)
 
-- Users must be authenticated (Clerk) to create topics/subtopics/habits and to toggle cells.
+- Users must be authenticated (Clerk) to create topics/habits and to toggle cells.
 - Data must be user-scoped using Clerk `userId`.
 - **CRUD:**
-  - Create Topic (top level)
-  - Create Subtopic (child of a topic)
-  - Create Habit inside a subtopic with `title` and `activeDays` (days of week the habit is active; inactive days become disabled cells)
+  - Create Topic
+  - Create Habit inside a topic with `title` and `activeDays` (days of week the habit is active; inactive days become disabled cells)
 - **Weekly view:**
   - Default to current week (Monday start).
   - Provide prev/next week navigation.
@@ -63,7 +60,6 @@ Empty for MVP.
 | id        | String   | cuid                                   |
 | userId    | String   | Clerk userId                           |
 | title     | String   |                                        |
-| parentId  | String?  | nullable — creates tree (topic/subtopic are the same model) |
 | order     | Int      |                                        |
 | createdAt | DateTime |                                        |
 | updatedAt | DateTime |                                        |
@@ -74,7 +70,7 @@ Empty for MVP.
 |------------|-----------|----------------------------------------------|
 | id         | String    | cuid                                         |
 | userId     | String    | Clerk userId                                 |
-| topicId    | String    | points to a subtopic                         |
+| topicId    | String    | points to a topic                            |
 | title      | String    |                                               |
 | activeDays | String[]  | e.g. `["MON","TUE","WED","THU","FRI"]`       |
 | order      | Int       |                                               |
@@ -95,7 +91,7 @@ Empty for MVP.
 ## API / Data Fetching
 
 - Efficiently fetch for week range:
-  - Get all selected subtopics' habits
+  - Get all selected topics' habits
   - Get all logs for these `habitId`s where `date` between `startOfWeek` and `endOfWeek`
   - Build a map on the server (or client) to render quickly.
 - Ensure authorization checks: `userId` must match on all reads/writes.
@@ -103,8 +99,8 @@ Empty for MVP.
 ## UI Components (shadcn)
 
 - Use: `Button`, `Card`, `Checkbox`, `Input`, `Dialog`, `Separator`, `ScrollArea` (if needed)
-- Left tree can be simple nested list with indentation and expand/collapse.
-- Add `+ Topic`, `+ Subtopic`, `+ Habit` actions:
+- Left sidebar is a flat list of topics with checkboxes.
+- Add `+ Topic` and `+ Habit` actions:
   - Can use Dialog modal forms.
 
 ## Implementation Details

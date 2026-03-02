@@ -27,8 +27,8 @@ cp .env .env
 
 Required variables:
 - `DATABASE_URL` — PostgreSQL connection string
-- `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` — from [Clerk dashboard](https://dashboard.clerk.com)
-- `CLERK_SECRET_KEY` — from Clerk dashboard
+- `NEXT_PUBLIC_CLERK_PUBLISHABLE` — from [Clerk dashboard](https://dashboard.clerk.com)
+- `CLERK_SECRET` — from Clerk dashboard
 - `NEXT_PUBLIC_CLERK_SIGN_IN_URL=/sign-in`
 - `NEXT_PUBLIC_CLERK_SIGN_UP_URL=/sign-up`
 

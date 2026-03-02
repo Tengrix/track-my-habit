@@ -20,11 +20,11 @@ export async function createHabit(input: {
   const userId = await getAuthUserId();
   const data = createHabitSchema.parse(input);
 
-  // Verify the subtopic belongs to user
+  // Verify the topic belongs to user
   const topic = await db.topic.findFirst({
     where: { id: data.topicId, userId },
   });
-  if (!topic) throw new Error("Subtopic not found");
+  if (!topic) throw new Error("Topic not found");
 
   const maxOrder = await db.habit.aggregate({
     where: { topicId: data.topicId },
@@ -45,18 +45,18 @@ export async function createHabit(input: {
 }
 
 export async function getHabitsWithLogs(
-  subtopicIds: string[],
+  habitIds: string[],
   weekStart: string,
   weekEnd: string
 ) {
   const userId = await getAuthUserId();
 
-  if (subtopicIds.length === 0) return [];
+  if (habitIds.length === 0) return [];
 
   const habits = await db.habit.findMany({
     where: {
       userId,
-      topicId: { in: subtopicIds },
+      id: { in: habitIds },
     },
     orderBy: { order: "asc" },
     include: {

@@ -1,8 +1,7 @@
 export interface TopicNode {
   id: string;
   title: string;
-  parentId: string | null;
-  children: TopicNode[];
+  habits: { id: string; title: string }[];
 }
 
 export interface HabitData {
@@ -13,7 +12,7 @@ export interface HabitData {
   logs: { id: string; date: string; status: string }[];
 }
 
-export interface SubtopicSection {
+export interface TopicSection {
   id: string;
   title: string;
   habits: HabitData[];

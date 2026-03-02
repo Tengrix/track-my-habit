@@ -4,12 +4,12 @@ import { useTransition } from "react";
 import { toggleHabitLog } from "@/app/actions/habits";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import { getWeekDays, getDayLabel, formatDateKey, DAY_LABELS, type DayLabel } from "@/lib/week";
+import { getWeekDays, getDayLabel, formatDateKey, type DayLabel } from "@/lib/week";
 import { Check } from "lucide-react";
-import type { HabitData, SubtopicSection } from "@/lib/types";
+import type { HabitData, TopicSection } from "@/lib/types";
 
 interface HabitWeekGridProps {
-  sections: SubtopicSection[];
+  sections: TopicSection[];
   weekStart: Date;
 }
 
@@ -20,7 +20,7 @@ export function HabitWeekGrid({ sections, weekStart }: HabitWeekGridProps) {
     return (
       <div className="flex flex-1 items-center justify-center">
         <p className="text-muted-foreground">
-          Select subtopics from the sidebar to view habits.
+          Select topics from the sidebar to view habits.
         </p>
       </div>
     );

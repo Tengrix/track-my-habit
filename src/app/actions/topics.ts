@@ -8,22 +8,14 @@ import type { TopicNode } from "@/lib/types";
 
 const createTopicSchema = z.object({
   title: z.string().min(1).max(100),
-  parentId: z.string().nullable(),
 });
 
-export async function createTopic(input: { title: string; parentId: string | null }) {
+export async function createTopic(input: { title: string }) {
   const userId = await getAuthUserId();
   const data = createTopicSchema.parse(input);
 
-  if (data.parentId) {
-    const parent = await db.topic.findFirst({
-      where: { id: data.parentId, userId },
-    });
-    if (!parent) throw new Error("Parent topic not found");
-  }
-
   const maxOrder = await db.topic.aggregate({
-    where: { userId, parentId: data.parentId },
+    where: { userId },
     _max: { order: true },
   });
 
@@ -31,7 +23,6 @@ export async function createTopic(input: { title: string; parentId: string | nul
     data: {
       userId,
       title: data.title,
-      parentId: data.parentId,
       order: (maxOrder._max.order ?? -1) + 1,
     },
   });
@@ -39,35 +30,23 @@ export async function createTopic(input: { title: string; parentId: string | nul
   revalidatePath("/");
 }
 
-export async function getTopicsTree(): Promise<TopicNode[]> {
+export async function getTopics(): Promise<TopicNode[]> {
   const userId = await getAuthUserId();
 
   const topics = await db.topic.findMany({
     where: { userId },
     orderBy: { order: "asc" },
+    include: {
+      habits: {
+        orderBy: { order: "asc" },
+        select: { id: true, title: true },
+      },
+    },
   });
 
-  // Build tree: top-level topics with children
-  const topLevel = topics.filter((t) => !t.parentId);
-  const childrenMap = new Map<string, TopicNode[]>();
-
-  for (const topic of topics) {
-    if (topic.parentId) {
-      const existing = childrenMap.get(topic.parentId) ?? [];
-      existing.push({
-        id: topic.id,
-        title: topic.title,
-        parentId: topic.parentId,
-        children: [],
-      });
-      childrenMap.set(topic.parentId, existing);
-    }
-  }
-
-  return topLevel.map((t) => ({
+  return topics.map((t) => ({
     id: t.id,
     title: t.title,
-    parentId: t.parentId,
-    children: childrenMap.get(t.id) ?? [],
+    habits: t.habits,
   }));
 }
