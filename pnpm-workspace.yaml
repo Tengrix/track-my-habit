@@ -1,0 +1,8 @@
+packages:
+  - 'packages/*'
+
+approveBuilds:
+  - '@prisma/client'
+  - '@prisma/engines'
+  - 'prisma'
+  - '@clerk/shared'

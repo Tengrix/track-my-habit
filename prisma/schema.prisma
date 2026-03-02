@@ -1,0 +1,58 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Topic {
+  id        String   @id @default(cuid())
+  userId    String
+  title     String
+  parentId  String?
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  parent   Topic?  @relation("TopicTree", fields: [parentId], references: [id], onDelete: Cascade)
+  children Topic[] @relation("TopicTree")
+  habits   Habit[]
+
+  @@index([userId])
+  @@index([parentId])
+}
+
+enum HabitLogStatus {
+  DONE
+}
+
+model Habit {
+  id         String   @id @default(cuid())
+  userId     String
+  topicId    String
+  title      String
+  activeDays String[]
+  order      Int      @default(0)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  topic Topic     @relation(fields: [topicId], references: [id], onDelete: Cascade)
+  logs  HabitLog[]
+
+  @@index([userId])
+  @@index([topicId])
+}
+
+model HabitLog {
+  id      String         @id @default(cuid())
+  habitId String
+  date    DateTime       @db.Date
+  status  HabitLogStatus @default(DONE)
+
+  habit Habit @relation(fields: [habitId], references: [id], onDelete: Cascade)
+
+  @@unique([habitId, date])
+  @@index([habitId])
+}
