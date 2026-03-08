@@ -50,3 +50,16 @@ export async function getTopics(): Promise<TopicNode[]> {
     habits: t.habits,
   }));
 }
+
+export async function deleteTopic(topicId: string) {
+  const userId = await getAuthUserId();
+
+  const topic = await db.topic.findFirst({
+    where: { id: topicId, userId },
+  });
+  if (!topic) throw new Error("Topic not found");
+
+  await db.topic.delete({ where: { id: topicId } });
+
+  revalidatePath("/");
+}

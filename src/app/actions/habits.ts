@@ -44,6 +44,19 @@ export async function createHabit(input: {
   revalidatePath("/");
 }
 
+export async function deleteHabit(habitId: string) {
+  const userId = await getAuthUserId();
+
+  const habit = await db.habit.findFirst({
+    where: { id: habitId, userId },
+  });
+  if (!habit) throw new Error("Habit not found");
+
+  await db.habit.delete({ where: { id: habitId } });
+
+  revalidatePath("/");
+}
+
 export async function getHabitsWithLogs(
   habitIds: string[],
   weekStart: string,

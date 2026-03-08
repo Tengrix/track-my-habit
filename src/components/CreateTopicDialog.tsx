@@ -11,7 +11,8 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Plus } from "lucide-react";
+import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
+import { Plus, Loader2 } from "lucide-react";
 
 export function CreateTopicDialog() {
   const [open, setOpen] = useState(false);
@@ -33,25 +34,41 @@ export function CreateTopicDialog() {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button variant="ghost" size="sm" className="h-7 gap-1 text-xs">
-          <Plus className="h-3 w-3" />
-          Topic
-        </Button>
-      </DialogTrigger>
-      <DialogContent>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <DialogTrigger asChild>
+            <Button variant="ghost" size="icon" className="h-6 w-6 rounded-md text-muted-foreground hover:text-foreground transition-colors">
+              <Plus className="h-3.5 w-3.5" />
+            </Button>
+          </DialogTrigger>
+        </TooltipTrigger>
+        <TooltipContent>New topic</TooltipContent>
+      </Tooltip>
+      <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>New Topic</DialogTitle>
+          <DialogTitle className="text-base">New Topic</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <Input
-            placeholder="Topic name"
+            placeholder="e.g. Morning Routine, Fitness, Learning..."
             value={title}
             onChange={(e) => setTitle(e.target.value)}
+            className="h-10"
             autoFocus
           />
-          <Button type="submit" disabled={loading || !title.trim()}>
-            {loading ? "Creating..." : "Create"}
+          <Button
+            type="submit"
+            disabled={loading || !title.trim()}
+            className="h-9 transition-all"
+          >
+            {loading ? (
+              <>
+                <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />
+                Creating...
+              </>
+            ) : (
+              "Create Topic"
+            )}
           </Button>
         </form>
       </DialogContent>

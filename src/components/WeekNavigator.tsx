@@ -1,7 +1,8 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
+import { ChevronLeft, ChevronRight, Calendar } from "lucide-react";
 import { formatDateDisplay, getWeekEnd } from "@/lib/week";
 
 interface WeekNavigatorProps {
@@ -15,19 +16,52 @@ export function WeekNavigator({ weekStart, onPrev, onNext, onToday }: WeekNaviga
   const weekEnd = getWeekEnd(weekStart);
 
   return (
-    <div className="flex items-center gap-2">
-      <Button variant="outline" size="icon" onClick={onPrev} className="h-8 w-8">
-        <ChevronLeft className="h-4 w-4" />
-      </Button>
-      <Button variant="outline" size="sm" onClick={onToday} className="h-8 text-xs">
-        Today
-      </Button>
-      <Button variant="outline" size="icon" onClick={onNext} className="h-8 w-8">
-        <ChevronRight className="h-4 w-4" />
-      </Button>
-      <span className="ml-2 text-sm font-medium">
-        {formatDateDisplay(weekStart)} – {formatDateDisplay(weekEnd)}
-      </span>
+    <div className="flex items-center gap-1.5">
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onPrev}
+            className="h-8 w-8 rounded-lg text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>Previous week</TooltipContent>
+      </Tooltip>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onToday}
+            className="h-8 rounded-lg px-3 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors gap-1.5"
+          >
+            <Calendar className="h-3.5 w-3.5" />
+            Today
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>Jump to today</TooltipContent>
+      </Tooltip>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onNext}
+            className="h-8 w-8 rounded-lg text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>Next week</TooltipContent>
+      </Tooltip>
+      <div className="ml-1 rounded-lg bg-secondary/80 px-3 py-1.5">
+        <span className="text-sm font-medium tracking-tight">
+          {formatDateDisplay(weekStart)} – {formatDateDisplay(weekEnd)}
+        </span>
+      </div>
     </div>
   );
 }
