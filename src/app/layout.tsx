@@ -4,6 +4,8 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import React from "react";
 
+export const dynamic = "force-dynamic";
+
 const inter = Inter({ subsets: ["latin", "cyrillic"] });
 
 export const metadata: Metadata = {
@@ -17,7 +19,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <ClerkProvider>
+    <ClerkProvider dynamic>
       <html lang="en">
         <body className={`${inter.className} min-h-screen antialiased`}>
           {children}
