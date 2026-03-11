@@ -104,7 +104,7 @@ export function TopicTree({ topics, selectedHabitIds, onToggleHabit, onHabitDele
                   </span>
                 )}
                 <div
-                  className="flex items-center gap-0.5 opacity-0 group-hover/topic:opacity-100 transition-opacity"
+                  className="flex items-center gap-0.5 md:opacity-0 md:group-hover/topic:opacity-100 transition-opacity"
                   onClick={(e) => e.stopPropagation()}
                 >
                   <Tooltip>
@@ -158,7 +158,7 @@ export function TopicTree({ topics, selectedHabitIds, onToggleHabit, onHabitDele
                             <Button
                               variant="ghost"
                               size="icon"
-                              className="h-5 w-5 rounded-md opacity-0 group-hover/habit:opacity-100 text-muted-foreground hover:text-destructive transition-all shrink-0"
+                              className="h-5 w-5 rounded-md md:opacity-0 md:group-hover/habit:opacity-100 text-muted-foreground hover:text-destructive transition-all shrink-0"
                               disabled={deletingId === habit.id}
                               onClick={() => handleDeleteHabit(habit.id)}
                             >

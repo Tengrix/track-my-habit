@@ -19,9 +19,9 @@ export function HabitWeekGrid({ sections, weekStart, onToggle }: HabitWeekGridPr
 
   if (sections.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-24 gap-4 animate-fade-in">
-        <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-secondary">
-          <Inbox className="h-7 w-7 text-muted-foreground" />
+      <div className="flex flex-col items-center justify-center py-16 sm:py-24 gap-4 animate-fade-in px-4">
+        <div className="flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-2xl bg-secondary">
+          <Inbox className="h-6 w-6 sm:h-7 sm:w-7 text-muted-foreground" />
         </div>
         <div className="text-center">
           <p className="text-sm font-medium text-muted-foreground">Your week is wide open</p>
@@ -44,33 +44,33 @@ export function HabitWeekGrid({ sections, weekStart, onToggle }: HabitWeekGridPr
           <div className="border-b border-border/40 px-5 py-3.5">
             <h3 className="text-sm font-semibold tracking-tight">{section.title}</h3>
           </div>
-          <div className="p-4">
+          <div className="p-3 sm:p-4">
             {section.habits.length === 0 ? (
               <p className="py-2 text-sm text-muted-foreground">
                 No habits yet. Add one from the sidebar.
               </p>
             ) : (
-              <div className="overflow-x-auto">
+              <div className="overflow-x-auto -mx-3 px-3 sm:mx-0 sm:px-0">
                 <table className="w-full text-sm">
                   <thead>
                     <tr>
-                      <th className="pb-3 pr-4 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground min-w-[140px]">
+                      <th className="pb-2 sm:pb-3 pr-2 sm:pr-4 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground min-w-[100px] sm:min-w-[140px]">
                         Habit
                       </th>
                       {weekDays.map((day) => {
                         const dateKey = formatDateKey(day);
                         const isToday = dateKey === today;
                         return (
-                          <th key={day.toISOString()} className="pb-3 text-center w-12">
+                          <th key={day.toISOString()} className="pb-2 sm:pb-3 text-center w-9 sm:w-12">
                             <div
                               className={cn(
-                                "inline-flex flex-col items-center rounded-lg px-1.5 py-0.5 transition-colors",
+                                "inline-flex flex-col items-center rounded-lg px-1 sm:px-1.5 py-0.5 transition-colors",
                                 isToday && "bg-primary/12 ring-1 ring-primary/20"
                               )}
                             >
                               <span
                                 className={cn(
-                                  "text-[10px] font-semibold uppercase tracking-wider",
+                                  "text-[9px] sm:text-[10px] font-semibold uppercase tracking-wider",
                                   isToday ? "text-primary" : "text-muted-foreground"
                                 )}
                               >
@@ -78,7 +78,7 @@ export function HabitWeekGrid({ sections, weekStart, onToggle }: HabitWeekGridPr
                               </span>
                               <span
                                 className={cn(
-                                  "text-xs font-medium",
+                                  "text-[10px] sm:text-xs font-medium",
                                   isToday ? "text-primary font-bold" : "text-muted-foreground/70"
                                 )}
                               >
@@ -141,8 +141,8 @@ function HabitRow({
 
   return (
     <tr className="group/row">
-      <td className="py-1.5 pr-4">
-        <span className="text-[13px] font-medium text-foreground/80 group-hover/row:text-foreground transition-colors">
+      <td className="py-1 sm:py-1.5 pr-2 sm:pr-4">
+        <span className="text-xs sm:text-[13px] font-medium text-foreground/80 group-hover/row:text-foreground transition-colors line-clamp-1">
           {habit.title}
         </span>
       </td>
@@ -155,20 +155,20 @@ function HabitRow({
         const isAnimating = animatingCell === dateKey;
 
         return (
-          <td key={dateKey} className="py-1.5 text-center">
+          <td key={dateKey} className="py-1 sm:py-1.5 text-center">
             <button
               disabled={!isActive || isPending}
               onClick={() => handleToggle(dateKey)}
               className={cn(
-                "group/cell mx-auto flex h-9 w-9 items-center justify-center rounded-lg border transition-all duration-150",
+                "group/cell mx-auto flex h-7 w-7 sm:h-9 sm:w-9 items-center justify-center rounded-md sm:rounded-lg border transition-all duration-150",
                 !isActive && "cursor-not-allowed border-transparent bg-muted/50",
                 isActive && !isDone && [
-                  "border-border/60 hover:border-primary/40 hover:bg-primary/5 cursor-pointer",
+                  "border-border/60 hover:border-primary/40 hover:bg-primary/5 active:bg-primary/10 cursor-pointer",
                   isToday && "border-primary/30 ring-1 ring-primary/10",
                 ],
                 isActive && isDone && [
                   "border-transparent bg-emerald-500 text-white cursor-pointer shadow-sm shadow-emerald-500/25",
-                  "hover:bg-emerald-600",
+                  "hover:bg-emerald-600 active:bg-emerald-700",
                 ],
                 isAnimating && "animate-cell-pop",
                 isPending && "opacity-60",
@@ -183,9 +183,9 @@ function HabitRow({
                   : "Click to mark done"
               }
             >
-              {isDone && <Check className="h-4 w-4" strokeWidth={2.5} />}
+              {isDone && <Check className="h-3.5 w-3.5 sm:h-4 sm:w-4" strokeWidth={2.5} />}
               {isActive && !isDone && (
-                <Check className="h-3.5 w-3.5 opacity-0 group-hover/cell:opacity-20 text-muted-foreground transition-opacity" strokeWidth={2} />
+                <Check className="h-3 w-3 sm:h-3.5 sm:w-3.5 opacity-0 group-hover/cell:opacity-20 text-muted-foreground transition-opacity" strokeWidth={2} />
               )}
             </button>
           </td>

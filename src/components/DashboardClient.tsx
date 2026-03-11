@@ -6,6 +6,7 @@ import { HabitWeekGrid } from "@/components/HabitWeekGrid";
 import { WeekNavigator } from "@/components/WeekNavigator";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { Button } from "@/components/ui/button";
 import { getHabitsWithLogs } from "@/app/actions/habits";
 import {
   getWeekStart,
@@ -14,7 +15,7 @@ import {
   formatDateKey,
 } from "@/lib/week";
 import { UserButton } from "@clerk/nextjs";
-import { Activity } from "lucide-react";
+import { Activity, Menu, X } from "lucide-react";
 import type { TopicNode, HabitData } from "@/lib/types";
 
 const STORAGE_KEY = "track-my-habit-selected-habits";
@@ -113,16 +114,42 @@ export function DashboardClient({ topics }: DashboardClientProps) {
     }
   }
 
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
   return (
     <TooltipProvider delayDuration={300}>
       <div className="flex h-screen">
+        {/* Mobile sidebar overlay */}
+        {sidebarOpen && (
+          <div
+            className="fixed inset-0 z-40 bg-black/50 md:hidden"
+            onClick={() => setSidebarOpen(false)}
+          />
+        )}
+
         {/* Left sidebar */}
-        <aside className="w-72 shrink-0 border-r border-border/60 bg-gradient-to-b from-secondary/40 to-secondary/20">
+        <aside
+          className={`
+            fixed inset-y-0 left-0 z-50 w-72 shrink-0 border-r border-border/60
+            bg-background md:bg-gradient-to-b md:from-secondary/40 md:to-secondary/20
+            transition-transform duration-200 ease-in-out
+            md:relative md:translate-x-0
+            ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}
+          `}
+        >
           <div className="flex h-14 items-center gap-2 border-b border-border/60 px-5">
             <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary">
               <Activity className="h-4 w-4 text-primary-foreground" />
             </div>
             <span className="text-sm font-semibold tracking-tight">Track My Habit</span>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="ml-auto h-8 w-8 md:hidden"
+              onClick={() => setSidebarOpen(false)}
+            >
+              <X className="h-4 w-4" />
+            </Button>
           </div>
           <ScrollArea className="h-[calc(100vh-3.5rem)]">
             <div className="p-3">
@@ -138,7 +165,15 @@ export function DashboardClient({ topics }: DashboardClientProps) {
 
         {/* Center content */}
         <main className="flex flex-1 flex-col overflow-hidden bg-background">
-          <header className="flex h-14 shrink-0 items-center justify-between border-b border-border/60 px-6">
+          <header className="flex h-14 shrink-0 items-center justify-between border-b border-border/60 px-3 sm:px-6 gap-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 shrink-0 md:hidden"
+              onClick={() => setSidebarOpen(true)}
+            >
+              <Menu className="h-5 w-5" />
+            </Button>
             <WeekNavigator
               weekStart={weekStart}
               onPrev={() => setWeekStart((w) => shiftWeek(w, -1))}
@@ -154,7 +189,7 @@ export function DashboardClient({ topics }: DashboardClientProps) {
             />
           </header>
           <ScrollArea className="flex-1">
-            <div className="bg-grid min-h-full p-6">
+            <div className="bg-grid min-h-full p-3 sm:p-6">
               {loading ? (
                 <LoadingSkeleton />
               ) : (
@@ -170,17 +205,17 @@ export function DashboardClient({ topics }: DashboardClientProps) {
 
 function LoadingSkeleton() {
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-4 sm:gap-6">
       {[1, 2].map((i) => (
-        <div key={i} className="rounded-xl border border-border/60 bg-card p-5">
-          <div className="mb-4 h-5 w-32 rounded-md animate-shimmer" />
-          <div className="space-y-3">
+        <div key={i} className="rounded-xl border border-border/60 bg-card p-3 sm:p-5">
+          <div className="mb-3 sm:mb-4 h-5 w-32 rounded-md animate-shimmer" />
+          <div className="space-y-2 sm:space-y-3">
             {[1, 2, 3].map((j) => (
-              <div key={j} className="flex items-center gap-4">
-                <div className="h-4 w-24 rounded animate-shimmer" />
-                <div className="flex gap-2">
+              <div key={j} className="flex items-center gap-2 sm:gap-4">
+                <div className="h-4 w-16 sm:w-24 rounded animate-shimmer" />
+                <div className="flex gap-1.5 sm:gap-2">
                   {[1, 2, 3, 4, 5, 6, 7].map((k) => (
-                    <div key={k} className="h-9 w-9 rounded-lg animate-shimmer" />
+                    <div key={k} className="h-7 w-7 sm:h-9 sm:w-9 rounded-md sm:rounded-lg animate-shimmer" />
                   ))}
                 </div>
               </div>
