@@ -44,6 +44,36 @@ export async function createHabit(input: {
   revalidatePath("/");
 }
 
+const updateHabitSchema = z.object({
+  habitId: z.string().min(1),
+  title: z.string().min(1).max(200),
+  activeDays: z.array(z.enum(DAY_LABELS)).min(1),
+});
+
+export async function updateHabit(input: {
+  habitId: string;
+  title: string;
+  activeDays: string[];
+}) {
+  const userId = await getAuthUserId();
+  const data = updateHabitSchema.parse(input);
+
+  const habit = await db.habit.findFirst({
+    where: { id: data.habitId, userId },
+  });
+  if (!habit) throw new Error("Habit not found");
+
+  await db.habit.update({
+    where: { id: data.habitId },
+    data: {
+      title: data.title,
+      activeDays: data.activeDays,
+    },
+  });
+
+  revalidatePath("/");
+}
+
 export async function deleteHabit(habitId: string) {
   const userId = await getAuthUserId();
 

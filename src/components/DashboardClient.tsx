@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { TopicTree } from "@/components/TopicTree";
 import { HabitWeekGrid } from "@/components/HabitWeekGrid";
 import { WeekNavigator } from "@/components/WeekNavigator";
@@ -34,8 +34,8 @@ export function DashboardClient({ topics }: DashboardClientProps) {
   const [weekStart, setWeekStart] = useState(() => getWeekStart(new Date()));
   const [habits, setHabits] = useState<HabitData[]>([]);
   const [loading, setLoading] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  // Load from localStorage after hydration
   useEffect(() => {
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
@@ -48,20 +48,18 @@ export function DashboardClient({ topics }: DashboardClientProps) {
     if (hydrated) saveSelected(selectedHabitIds);
   }, [selectedHabitIds, hydrated]);
 
-  const onToggle = (habitId:string,dateKey:string) => {
-    let updatedStatusOfHabit = habits.map(hab=>{
-      if(hab.id===habitId){
-        let exist = hab.logs.some(h=>h.date===dateKey);
-        if(exist){
-          return {...hab, logs:hab.logs.filter(h=>h.date!==dateKey)}
-        }else{
-          return {...hab, logs:[...hab.logs, {id:crypto.randomUUID(), date:dateKey, status:'DONE'}]}
+  const onToggle = useCallback((habitId: string, dateKey: string) => {
+    setHabits((prev) =>
+      prev.map((hab) => {
+        if (hab.id !== habitId) return hab;
+        const exist = hab.logs.some((h) => h.date === dateKey);
+        if (exist) {
+          return { ...hab, logs: hab.logs.filter((h) => h.date !== dateKey) };
         }
-      }
-      return hab
-    })
-    setHabits(updatedStatusOfHabit)
-  }
+        return { ...hab, logs: [...hab.logs, { id: crypto.randomUUID(), date: dateKey, status: "DONE" }] };
+      })
+    );
+  }, []);
 
   const fetchHabits = useCallback(async () => {
     const ids = [...selectedHabitIds];
@@ -84,74 +82,75 @@ export function DashboardClient({ topics }: DashboardClientProps) {
     fetchHabits();
   }, [fetchHabits]);
 
-  function handleToggleHabit(habitId: string) {
+  const handleToggleHabit = useCallback((habitId: string) => {
     setSelectedHabitIds((prev) => {
       const next = new Set(prev);
       if (next.has(habitId)) next.delete(habitId);
       else next.add(habitId);
       return next;
     });
-  }
+  }, []);
 
-  function handleHabitDeleted(habitId: string) {
+  const handleHabitDeleted = useCallback((habitId: string) => {
     setSelectedHabitIds((prev) => {
       if (!prev.has(habitId)) return prev;
       const next = new Set(prev);
       next.delete(habitId);
       return next;
     });
-  }
+  }, []);
 
-  const sections: { id: string; title: string; habits: HabitData[] }[] = [];
-  for (const topic of topics) {
-    const topicHabits = habits.filter((h) => h.topicId === topic.id);
-    if (topicHabits.length > 0) {
-      sections.push({
-        id: topic.id,
-        title: topic.title,
-        habits: topicHabits,
-      });
+  const sections = useMemo(() => {
+    const result: { id: string; title: string; habits: HabitData[] }[] = [];
+    for (const topic of topics) {
+      const topicHabits = habits.filter((h) => h.topicId === topic.id);
+      if (topicHabits.length > 0) {
+        result.push({ id: topic.id, title: topic.title, habits: topicHabits });
+      }
     }
-  }
+    return result;
+  }, [topics, habits]);
 
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const handlePrev = useCallback(() => setWeekStart((w) => shiftWeek(w, -1)), []);
+  const handleNext = useCallback(() => setWeekStart((w) => shiftWeek(w, 1)), []);
+  const handleToday = useCallback(() => setWeekStart(getWeekStart(new Date())), []);
+  const closeSidebar = useCallback(() => setSidebarOpen(false), []);
+  const openSidebar = useCallback(() => setSidebarOpen(true), []);
 
   return (
     <TooltipProvider delayDuration={300}>
-      <div className="flex h-screen">
-        {/* Mobile sidebar overlay */}
+      <div className="flex h-screen overflow-hidden">
         {sidebarOpen && (
           <div
-            className="fixed inset-0 z-40 bg-black/50 md:hidden"
-            onClick={() => setSidebarOpen(false)}
+            className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm md:hidden transition-opacity"
+            onClick={closeSidebar}
           />
         )}
 
-        {/* Left sidebar */}
         <aside
           className={`
-            fixed inset-y-0 left-0 z-50 w-72 shrink-0 border-r border-border/60
-            bg-background md:bg-gradient-to-b md:from-secondary/40 md:to-secondary/20
+            fixed inset-y-0 left-0 z-50 w-72 shrink-0 border-r border-border/50
+            bg-[hsl(var(--sidebar))]
             transition-transform duration-200 ease-in-out
             md:relative md:translate-x-0
             ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}
           `}
         >
-          <div className="flex h-14 items-center gap-2 border-b border-border/60 px-5">
-            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary">
-              <Activity className="h-4 w-4 text-primary-foreground" />
+          <div className="flex h-13 items-center gap-2.5 border-b border-border/50 px-5 mt-1 pb-0.5">
+            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-primary/80 shadow-sm shadow-primary/25">
+              <Activity className="h-3.5 w-3.5 text-primary-foreground" />
             </div>
-            <span className="text-sm font-semibold tracking-tight">Track My Habit</span>
+            <span className="text-sm font-bold tracking-tight">Track My Habit</span>
             <Button
               variant="ghost"
               size="icon"
-              className="ml-auto h-8 w-8 md:hidden"
-              onClick={() => setSidebarOpen(false)}
+              className="ml-auto h-7 w-7 md:hidden"
+              onClick={closeSidebar}
             >
               <X className="h-4 w-4" />
             </Button>
           </div>
-          <ScrollArea className="h-[calc(100vh-3.5rem)]">
+          <ScrollArea className="h-[calc(100vh-3.25rem)]">
             <div className="p-3">
               <TopicTree
                 topics={topics}
@@ -163,37 +162,41 @@ export function DashboardClient({ topics }: DashboardClientProps) {
           </ScrollArea>
         </aside>
 
-        {/* Center content */}
         <main className="flex flex-1 flex-col overflow-hidden bg-background">
-          <header className="flex h-14 shrink-0 items-center justify-between border-b border-border/60 px-3 sm:px-6 gap-2">
+          <header className="flex h-13 shrink-0 items-center justify-between border-b border-border/50 px-4 sm:px-6 gap-3 bg-card/50 backdrop-blur-sm">
             <Button
               variant="ghost"
               size="icon"
               className="h-8 w-8 shrink-0 md:hidden"
-              onClick={() => setSidebarOpen(true)}
+              onClick={openSidebar}
             >
-              <Menu className="h-5 w-5" />
+              <Menu className="h-4 w-4" />
             </Button>
             <WeekNavigator
               weekStart={weekStart}
-              onPrev={() => setWeekStart((w) => shiftWeek(w, -1))}
-              onNext={() => setWeekStart((w) => shiftWeek(w, 1))}
-              onToday={() => setWeekStart(getWeekStart(new Date()))}
+              onPrev={handlePrev}
+              onNext={handleNext}
+              onToday={handleToday}
             />
             <UserButton
               appearance={{
                 elements: {
-                  avatarBox: "h-8 w-8",
+                  avatarBox: "h-7 w-7",
                 },
               }}
             />
           </header>
           <ScrollArea className="flex-1">
-            <div className="bg-grid min-h-full p-3 sm:p-6">
+            <div className="bg-grid min-h-full p-3 sm:p-5">
               {loading ? (
                 <LoadingSkeleton />
               ) : (
-                <HabitWeekGrid sections={sections} weekStart={weekStart} onToggle={(habitId, dateKey)=>onToggle(habitId,dateKey)} />
+                <HabitWeekGrid
+                  sections={sections}
+                  weekStart={weekStart}
+                  onToggle={onToggle}
+                  onHabitUpdated={fetchHabits}
+                />
               )}
             </div>
           </ScrollArea>
@@ -205,21 +208,26 @@ export function DashboardClient({ topics }: DashboardClientProps) {
 
 function LoadingSkeleton() {
   return (
-    <div className="flex flex-col gap-4 sm:gap-6">
+    <div className="flex flex-col gap-3">
       {[1, 2].map((i) => (
-        <div key={i} className="rounded-xl border border-border/60 bg-card p-3 sm:p-5">
-          <div className="mb-3 sm:mb-4 h-5 w-32 rounded-md animate-shimmer" />
-          <div className="space-y-2 sm:space-y-3">
-            {[1, 2, 3].map((j) => (
-              <div key={j} className="flex items-center gap-2 sm:gap-4">
-                <div className="h-4 w-16 sm:w-24 rounded animate-shimmer" />
-                <div className="flex gap-1.5 sm:gap-2">
-                  {[1, 2, 3, 4, 5, 6, 7].map((k) => (
-                    <div key={k} className="h-7 w-7 sm:h-9 sm:w-9 rounded-md sm:rounded-lg animate-shimmer" />
-                  ))}
+        <div key={i} className="rounded-xl border border-border/50 bg-card overflow-hidden">
+          <div className="px-4 py-2.5 border-b border-border/30 flex items-center gap-3">
+            <div className="h-4 w-24 rounded animate-shimmer" />
+            <div className="ml-auto h-1.5 w-16 rounded-full animate-shimmer" />
+          </div>
+          <div className="p-3">
+            <div className="space-y-1.5">
+              {[1, 2, 3].map((j) => (
+                <div key={j} className="flex items-center gap-3">
+                  <div className="h-3 w-20 rounded animate-shimmer" />
+                  <div className="flex gap-1.5 ml-auto">
+                    {[1, 2, 3, 4, 5, 6, 7].map((k) => (
+                      <div key={k} className="h-6 w-6 sm:h-7 sm:w-7 rounded-md animate-shimmer" />
+                    ))}
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
       ))}

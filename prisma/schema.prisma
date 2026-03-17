@@ -39,6 +39,7 @@ model Habit {
 
   @@index([userId])
   @@index([topicId])
+  @@index([userId, topicId])
 }
 
 model HabitLog {
@@ -51,4 +52,5 @@ model HabitLog {
 
   @@unique([habitId, date])
   @@index([habitId])
+  @@index([habitId, date])
 }

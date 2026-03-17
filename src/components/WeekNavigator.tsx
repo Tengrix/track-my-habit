@@ -16,49 +16,51 @@ export function WeekNavigator({ weekStart, onPrev, onNext, onToday }: WeekNaviga
   const weekEnd = getWeekEnd(weekStart);
 
   return (
-    <div className="flex items-center gap-1 sm:gap-1.5 min-w-0">
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={onPrev}
-            className="h-7 w-7 sm:h-8 sm:w-8 rounded-lg text-muted-foreground hover:text-foreground transition-colors shrink-0"
-          >
-            <ChevronLeft className="h-4 w-4" />
-          </Button>
-        </TooltipTrigger>
-        <TooltipContent>Previous week</TooltipContent>
-      </Tooltip>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onToday}
-            className="h-7 sm:h-8 rounded-lg px-2 sm:px-3 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors gap-1 sm:gap-1.5 shrink-0"
-          >
-            <Calendar className="h-3.5 w-3.5" />
-            <span className="hidden xs:inline">Today</span>
-          </Button>
-        </TooltipTrigger>
-        <TooltipContent>Jump to today</TooltipContent>
-      </Tooltip>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={onNext}
-            className="h-7 w-7 sm:h-8 sm:w-8 rounded-lg text-muted-foreground hover:text-foreground transition-colors shrink-0"
-          >
-            <ChevronRight className="h-4 w-4" />
-          </Button>
-        </TooltipTrigger>
-        <TooltipContent>Next week</TooltipContent>
-      </Tooltip>
-      <div className="ml-1 rounded-lg bg-secondary/80 px-2 sm:px-3 py-1 sm:py-1.5 min-w-0">
-        <span className="text-xs sm:text-sm font-medium tracking-tight truncate block">
+    <div className="flex items-center gap-1 min-w-0">
+      <div className="flex items-center rounded-lg border border-border/50 bg-secondary/50 p-0.5">
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={onPrev}
+              className="h-6 w-6 sm:h-7 sm:w-7 rounded-md text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <ChevronLeft className="h-3.5 w-3.5" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>Previous week</TooltipContent>
+        </Tooltip>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onToday}
+              className="h-6 sm:h-7 rounded-md px-2 text-[11px] font-medium text-muted-foreground hover:text-foreground transition-colors gap-1"
+            >
+              <Calendar className="h-3 w-3" />
+              <span className="hidden xs:inline">Today</span>
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>Jump to today</TooltipContent>
+        </Tooltip>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={onNext}
+              className="h-6 w-6 sm:h-7 sm:w-7 rounded-md text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <ChevronRight className="h-3.5 w-3.5" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>Next week</TooltipContent>
+        </Tooltip>
+      </div>
+      <div className="ml-1.5 rounded-lg bg-secondary/60 px-2.5 py-1 min-w-0">
+        <span className="text-[11px] sm:text-xs font-semibold tracking-tight text-foreground/70 truncate block tabular-nums">
           {formatDateDisplay(weekStart)} – {formatDateDisplay(weekEnd)}
         </span>
       </div>

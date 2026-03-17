@@ -54,128 +54,124 @@ export function TopicTree({ topics, selectedHabitIds, onToggleHabit, onHabitDele
   }
 
   return (
-    <div className="flex flex-col gap-1">
-      <div className="flex items-center justify-between px-2 py-1.5">
+    <div className="flex flex-col gap-0.5">
+      <div className="flex items-center justify-between px-2 py-1.5 mb-0.5">
         <div className="flex items-center gap-1.5">
-          <Layers className="h-3.5 w-3.5 text-muted-foreground" />
-          <h2 className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
-            Topics{topics.length > 0 && <span className="ml-1 opacity-60">· {topics.length}</span>}
+          <Layers className="h-3 w-3 text-muted-foreground/70" />
+          <h2 className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/70">
+            Topics{topics.length > 0 && <span className="ml-1 opacity-60">({topics.length})</span>}
           </h2>
         </div>
         <CreateTopicDialog />
       </div>
-      <div className="flex flex-col gap-0.5">
-        {topics.length === 0 && (
-          <div className="flex flex-col items-center gap-2 py-8 px-4">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-secondary">
-              <Layers className="h-5 w-5 text-muted-foreground" />
-            </div>
-            <p className="text-sm text-muted-foreground text-center">
-              No topics yet
-            </p>
-            <p className="text-xs text-muted-foreground/70 text-center">
-              Hit the + button above to create your first topic
-            </p>
-          </div>
-        )}
-        {topics.map((topic) => {
-          const isExpanded = expandedIds.has(topic.id);
-          const selectedCount = topic.habits.filter((h) => selectedHabitIds.has(h.id)).length;
-          return (
-            <div key={topic.id}>
-              {/* Topic row */}
-              <div
-                className="group/topic flex items-center gap-1 rounded-lg px-2 py-1.5 hover:bg-accent/80 cursor-pointer select-none transition-colors"
-                onClick={() => toggleExpanded(topic.id)}
-              >
-                <span className="flex h-5 w-5 items-center justify-center shrink-0">
-                  {isExpanded ? (
-                    <ChevronDown className="h-3.5 w-3.5 text-muted-foreground transition-transform" />
-                  ) : (
-                    <ChevronRight className="h-3.5 w-3.5 text-muted-foreground transition-transform" />
-                  )}
-                </span>
-                <span className="flex-1 truncate text-[13px] font-medium">
-                  {topic.title}
-                </span>
-                {selectedCount > 0 && !isExpanded && (
-                  <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-primary/10 px-1.5 text-[10px] font-semibold text-primary">
-                    {selectedCount}
-                  </span>
-                )}
-                <div
-                  className="flex items-center gap-0.5 md:opacity-0 md:group-hover/topic:opacity-100 transition-opacity"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-6 w-6 rounded-md text-muted-foreground hover:text-destructive transition-colors"
-                        disabled={deletingId === topic.id}
-                        onClick={() => handleDeleteTopic(topic.id, topic.habits.map((h) => h.id))}
-                      >
-                        <Trash2 className="h-3 w-3" />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>Delete topic</TooltipContent>
-                  </Tooltip>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <div>
-                        <CreateHabitDialog topicId={topic.id} />
-                      </div>
-                    </TooltipTrigger>
-                    <TooltipContent>Add habit</TooltipContent>
-                  </Tooltip>
-                </div>
-              </div>
 
-              {/* Expanded habits */}
-              {isExpanded && (
-                <div className="ml-3 border-l border-border/60 pl-1 mb-1">
-                  {topic.habits.length === 0 ? (
-                    <p className="py-2 pl-3 text-xs text-muted-foreground/70 italic">
-                      No habits yet — add one above
-                    </p>
-                  ) : (
-                    topic.habits.map((habit) => (
-                      <div
-                        key={habit.id}
-                        className="group/habit flex items-center gap-1.5 rounded-lg px-2 py-1 hover:bg-accent/60 transition-colors"
-                      >
-                        <Checkbox
-                          checked={selectedHabitIds.has(habit.id)}
-                          onCheckedChange={() => onToggleHabit(habit.id)}
-                          className="shrink-0 h-3.5 w-3.5 rounded-[4px] border-muted-foreground/40 data-[state=checked]:border-primary data-[state=checked]:bg-primary transition-colors"
-                        />
-                        <span className="flex-1 truncate text-[13px] text-foreground/80">
-                          {habit.title}
-                        </span>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-5 w-5 rounded-md md:opacity-0 md:group-hover/habit:opacity-100 text-muted-foreground hover:text-destructive transition-all shrink-0"
-                              disabled={deletingId === habit.id}
-                              onClick={() => handleDeleteHabit(habit.id)}
-                            >
-                              <Trash2 className="h-2.5 w-2.5" />
-                            </Button>
-                          </TooltipTrigger>
-                          <TooltipContent>Delete habit</TooltipContent>
-                        </Tooltip>
-                      </div>
-                    ))
-                  )}
-                </div>
+      {topics.length === 0 && (
+        <div className="flex flex-col items-center gap-2 py-10 px-4">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-primary/10 to-primary/5 ring-1 ring-primary/10">
+            <Layers className="h-4 w-4 text-primary/40" />
+          </div>
+          <p className="text-xs font-medium text-muted-foreground">No topics yet</p>
+          <p className="text-[11px] text-muted-foreground/60 text-center">
+            Hit the + button above to create your first topic
+          </p>
+        </div>
+      )}
+
+      {topics.map((topic) => {
+        const isExpanded = expandedIds.has(topic.id);
+        const selectedCount = topic.habits.filter((h) => selectedHabitIds.has(h.id)).length;
+        return (
+          <div key={topic.id}>
+            <div
+              className="group/topic flex items-center gap-1 rounded-lg px-2 py-1.5 hover:bg-accent/10 cursor-pointer select-none transition-colors"
+              onClick={() => toggleExpanded(topic.id)}
+            >
+              <span className="flex h-4 w-4 items-center justify-center shrink-0">
+                {isExpanded ? (
+                  <ChevronDown className="h-3 w-3 text-muted-foreground/60" />
+                ) : (
+                  <ChevronRight className="h-3 w-3 text-muted-foreground/60" />
+                )}
+              </span>
+              <span className="flex-1 truncate text-xs font-medium">
+                {topic.title}
+              </span>
+              {selectedCount > 0 && !isExpanded && (
+                <span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-primary/10 px-1 text-[9px] font-bold text-primary tabular-nums">
+                  {selectedCount}
+                </span>
               )}
+              <div
+                className="flex items-center gap-0.5 md:opacity-0 md:group-hover/topic:opacity-100 transition-opacity"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-5 w-5 rounded text-muted-foreground hover:text-destructive transition-colors"
+                      disabled={deletingId === topic.id}
+                      onClick={() => handleDeleteTopic(topic.id, topic.habits.map((h) => h.id))}
+                    >
+                      <Trash2 className="h-2.5 w-2.5" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Delete topic</TooltipContent>
+                </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div>
+                      <CreateHabitDialog topicId={topic.id} />
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent>Add habit</TooltipContent>
+                </Tooltip>
+              </div>
             </div>
-          );
-        })}
-      </div>
+
+            {isExpanded && (
+              <div className="ml-4 border-l border-border/40 pl-1 mb-0.5">
+                {topic.habits.length === 0 ? (
+                  <p className="py-1.5 pl-2 text-[11px] text-muted-foreground/50 italic">
+                    No habits — add one above
+                  </p>
+                ) : (
+                  topic.habits.map((habit) => (
+                    <div
+                      key={habit.id}
+                      className="group/habit flex items-center gap-1.5 rounded-md px-2 py-0.5 hover:bg-accent/10 transition-colors"
+                    >
+                      <Checkbox
+                        checked={selectedHabitIds.has(habit.id)}
+                        onCheckedChange={() => onToggleHabit(habit.id)}
+                        className="shrink-0 h-3 w-3 rounded-[3px] border-muted-foreground/30 data-[state=checked]:border-primary data-[state=checked]:bg-primary transition-colors"
+                      />
+                      <span className="flex-1 truncate text-[11px] text-foreground/70">
+                        {habit.title}
+                      </span>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-4 w-4 rounded md:opacity-0 md:group-hover/habit:opacity-100 text-muted-foreground hover:text-destructive transition-all shrink-0"
+                            disabled={deletingId === habit.id}
+                            onClick={() => handleDeleteHabit(habit.id)}
+                          >
+                            <Trash2 className="h-2 w-2" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>Delete habit</TooltipContent>
+                      </Tooltip>
+                    </div>
+                  ))
+                )}
+              </div>
+            )}
+          </div>
+        );
+      })}
     </div>
   );
 }

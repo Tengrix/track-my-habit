@@ -1,25 +1,28 @@
 "use client";
 
 import { useState } from "react";
-import { createHabit } from "@/app/actions/habits";
+import { updateHabit } from "@/app/actions/habits";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Plus, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { DAY_LABELS, type DayLabel } from "@/lib/week";
 
-interface CreateHabitDialogProps {
-  topicId: string;
+interface EditHabitDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  habitId: string;
+  initialTitle: string;
+  initialActiveDays: string[];
+  onSaved?: () => void;
 }
 
-const ALL_DAYS = [...DAY_LABELS];
 const SHORT_LABELS: Record<DayLabel, string> = {
   MON: "Mo",
   TUE: "Tu",
@@ -30,10 +33,18 @@ const SHORT_LABELS: Record<DayLabel, string> = {
   SUN: "Su",
 };
 
-export function CreateHabitDialog({ topicId }: CreateHabitDialogProps) {
-  const [open, setOpen] = useState(false);
-  const [title, setTitle] = useState("");
-  const [activeDays, setActiveDays] = useState<DayLabel[]>([...ALL_DAYS]);
+export function EditHabitDialog({
+  open,
+  onOpenChange,
+  habitId,
+  initialTitle,
+  initialActiveDays,
+  onSaved,
+}: EditHabitDialogProps) {
+  const [title, setTitle] = useState(initialTitle);
+  const [activeDays, setActiveDays] = useState<DayLabel[]>(
+    initialActiveDays as DayLabel[]
+  );
   const [loading, setLoading] = useState(false);
 
   function toggleDay(day: DayLabel) {
@@ -47,25 +58,19 @@ export function CreateHabitDialog({ topicId }: CreateHabitDialogProps) {
     if (!title.trim() || activeDays.length === 0) return;
     setLoading(true);
     try {
-      await createHabit({ topicId, title: title.trim(), activeDays });
-      setTitle("");
-      setActiveDays([...ALL_DAYS]);
-      setOpen(false);
+      await updateHabit({ habitId, title: title.trim(), activeDays });
+      onOpenChange(false);
+      onSaved?.();
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button variant="ghost" size="icon" className="h-6 w-6 rounded-md text-muted-foreground hover:text-foreground transition-colors">
-          <Plus className="h-3.5 w-3.5" />
-        </Button>
-      </DialogTrigger>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="text-base">New Habit</DialogTitle>
+          <DialogTitle className="text-base">Edit Habit</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="flex flex-col gap-5">
           <Input
@@ -80,10 +85,11 @@ export function CreateHabitDialog({ topicId }: CreateHabitDialogProps) {
               Active days
             </p>
             <p className="mb-2.5 text-[11px] text-muted-foreground/70">
-              Select which days of the week you plan to do this habit. Unselected days will appear as rest days in your weekly grid.
+              Select which days of the week you plan to do this habit. Unselected
+              days will appear as rest days in your weekly grid.
             </p>
             <div className="flex gap-1.5">
-              {ALL_DAYS.map((day) => {
+              {DAY_LABELS.map((day) => {
                 const isActive = activeDays.includes(day);
                 return (
                   <button
@@ -111,10 +117,10 @@ export function CreateHabitDialog({ topicId }: CreateHabitDialogProps) {
             {loading ? (
               <>
                 <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />
-                Creating...
+                Saving...
               </>
             ) : (
-              "Create Habit"
+              "Save Changes"
             )}
           </Button>
         </form>
