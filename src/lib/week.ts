@@ -1,4 +1,5 @@
-import { startOfWeek, endOfWeek, addWeeks, format, eachDayOfInterval } from "date-fns";
+import { startOfWeek, endOfWeek, addWeeks, subMonths, subYears, format, eachDayOfInterval } from "date-fns";
+import type { ActivityRange } from "@/lib/types";
 
 const WEEK_OPTIONS = { weekStartsOn: 1 as const }; // Monday
 
@@ -45,4 +46,24 @@ export function parseWeekParam(param: string | undefined): Date {
     }
   }
   return getWeekStart(new Date());
+}
+
+export function getActivityDateRange(range: ActivityRange): { start: Date; end: Date } {
+  const today = new Date();
+  const end = today;
+  let start: Date;
+  switch (range) {
+    case "1m": start = subMonths(today, 1); break;
+    case "3m": start = subMonths(today, 3); break;
+    case "6m": start = subMonths(today, 6); break;
+    case "1y": start = subYears(today, 1); break;
+  }
+  return {
+    start: startOfWeek(start, WEEK_OPTIONS),
+    end: endOfWeek(end, WEEK_OPTIONS),
+  };
+}
+
+export function eachDayOfRange(start: Date, end: Date): Date[] {
+  return eachDayOfInterval({ start, end });
 }

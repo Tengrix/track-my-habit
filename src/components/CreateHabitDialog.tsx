@@ -59,15 +59,15 @@ export function CreateHabitDialog({ topicId }: CreateHabitDialogProps) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="ghost" size="icon" className="h-6 w-6 rounded-md text-muted-foreground hover:text-foreground transition-colors">
+        <Button variant="ghost" size="icon" className="h-6 w-6 rounded-md text-muted-foreground/50 hover:text-foreground transition-colors">
           <Plus className="h-3.5 w-3.5" />
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle className="text-base">New Habit</DialogTitle>
+      <DialogContent className="sm:max-w-[420px] gap-0 p-0 overflow-hidden">
+        <DialogHeader className="px-6 pt-6 pb-0">
+          <DialogTitle className="text-base font-semibold">New Habit</DialogTitle>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+        <form onSubmit={handleSubmit} className="flex flex-col gap-5 px-6 py-5">
           <Input
             placeholder="e.g. Read 20 pages, Meditate, Push-ups..."
             value={title}
@@ -76,11 +76,11 @@ export function CreateHabitDialog({ topicId }: CreateHabitDialogProps) {
             autoFocus
           />
           <div>
-            <p className="mb-1 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+            <label className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground/60 mb-1 block">
               Active days
-            </p>
-            <p className="mb-2.5 text-[11px] text-muted-foreground/70">
-              Select which days of the week you plan to do this habit. Unselected days will appear as rest days in your weekly grid.
+            </label>
+            <p className="mb-3 text-[12px] text-muted-foreground/50 leading-relaxed">
+              Unselected days appear as rest days in your grid.
             </p>
             <div className="flex gap-1.5">
               {ALL_DAYS.map((day) => {
@@ -91,10 +91,10 @@ export function CreateHabitDialog({ topicId }: CreateHabitDialogProps) {
                     type="button"
                     onClick={() => toggleDay(day)}
                     className={cn(
-                      "flex h-9 w-9 items-center justify-center rounded-lg text-xs font-medium transition-all",
+                      "flex h-9 flex-1 items-center justify-center rounded-lg text-xs font-medium transition-all duration-150",
                       isActive
-                        ? "bg-primary text-primary-foreground shadow-sm"
-                        : "bg-secondary text-muted-foreground hover:bg-accent hover:text-foreground"
+                        ? "bg-primary text-primary-foreground shadow-sm shadow-primary/20"
+                        : "bg-muted/60 text-muted-foreground/60 hover:bg-muted hover:text-foreground/70"
                     )}
                   >
                     {SHORT_LABELS[day]}
@@ -106,7 +106,7 @@ export function CreateHabitDialog({ topicId }: CreateHabitDialogProps) {
           <Button
             type="submit"
             disabled={loading || !title.trim() || activeDays.length === 0}
-            className="h-9 transition-all"
+            className="h-9"
           >
             {loading ? (
               <>
