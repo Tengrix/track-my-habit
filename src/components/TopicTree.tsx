@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import {
   DndContext,
   closestCenter,
@@ -37,9 +37,15 @@ interface TopicTreeProps {
   onHabitDeleted?: (habitId: string) => void;
 }
 
-export function TopicTree({ topics, selectedHabitIds, onToggleHabit, onHabitDeleted }: TopicTreeProps) {
+export function TopicTree({ topics: serverTopics, selectedHabitIds, onToggleHabit, onHabitDeleted }: TopicTreeProps) {
+  const [optimisticTopics, setOptimisticTopics] = useState(serverTopics);
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
   const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  // Sync with server data when it changes (e.g. after revalidation)
+  useEffect(() => {
+    setOptimisticTopics(serverTopics);
+  }, [serverTopics]);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
@@ -82,14 +88,24 @@ export function TopicTree({ topics, selectedHabitIds, onToggleHabit, onHabitDele
       const { active, over } = event;
       if (!over || active.id === over.id) return;
 
-      const oldIndex = topics.findIndex((t) => t.id === active.id);
-      const newIndex = topics.findIndex((t) => t.id === over.id);
+      const oldIndex = optimisticTopics.findIndex((t) => t.id === active.id);
+      const newIndex = optimisticTopics.findIndex((t) => t.id === over.id);
       if (oldIndex === -1 || newIndex === -1) return;
 
-      const newOrder = arrayMove(topics, oldIndex, newIndex);
+      const newOrder = arrayMove(optimisticTopics, oldIndex, newIndex);
+      setOptimisticTopics(newOrder);
       reorderTopics(newOrder.map((t) => t.id));
     },
-    [topics]
+    [optimisticTopics]
+  );
+
+  const handleOptimisticHabitReorder = useCallback(
+    (topicId: string, reorderedHabits: TopicNode["habits"]) => {
+      setOptimisticTopics((prev) =>
+        prev.map((t) => (t.id === topicId ? { ...t, habits: reorderedHabits } : t))
+      );
+    },
+    []
   );
 
   return (
@@ -101,7 +117,7 @@ export function TopicTree({ topics, selectedHabitIds, onToggleHabit, onHabitDele
         <CreateTopicDialog />
       </div>
 
-      {topics.length === 0 && (
+      {optimisticTopics.length === 0 && (
         <div className="flex flex-col items-center gap-3 py-12 px-4">
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-muted/80">
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="text-muted-foreground/50">
@@ -121,8 +137,8 @@ export function TopicTree({ topics, selectedHabitIds, onToggleHabit, onHabitDele
       )}
 
       <DndContext id="topics-dnd" sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleTopicDragEnd}>
-        <SortableContext items={topics.map((t) => t.id)} strategy={verticalListSortingStrategy}>
-          {topics.map((topic) => (
+        <SortableContext items={optimisticTopics.map((t) => t.id)} strategy={verticalListSortingStrategy}>
+          {optimisticTopics.map((topic) => (
             <SortableTopicItem
               key={topic.id}
               topic={topic}
@@ -134,6 +150,7 @@ export function TopicTree({ topics, selectedHabitIds, onToggleHabit, onHabitDele
               onDeleteTopic={handleDeleteTopic}
               onDeleteHabit={handleDeleteHabit}
               sensors={sensors}
+              onOptimisticHabitReorder={handleOptimisticHabitReorder}
             />
           ))}
         </SortableContext>
@@ -152,6 +169,7 @@ interface SortableTopicItemProps {
   onDeleteTopic: (id: string, habitIds: string[]) => void;
   onDeleteHabit: (id: string) => void;
   sensors: ReturnType<typeof useSensors>;
+  onOptimisticHabitReorder: (topicId: string, habits: TopicNode["habits"]) => void;
 }
 
 function SortableTopicItem({
@@ -164,6 +182,7 @@ function SortableTopicItem({
   onDeleteTopic,
   onDeleteHabit,
   sensors,
+  onOptimisticHabitReorder,
 }: SortableTopicItemProps) {
   const {
     attributes,
@@ -193,9 +212,10 @@ function SortableTopicItem({
       if (oldIndex === -1 || newIndex === -1) return;
 
       const newOrder = arrayMove(topic.habits, oldIndex, newIndex);
+      onOptimisticHabitReorder(topic.id, newOrder);
       reorderHabits(topic.id, newOrder.map((h) => h.id));
     },
-    [topic.id, topic.habits]
+    [topic.id, topic.habits, onOptimisticHabitReorder]
   );
 
   return (
