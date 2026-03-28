@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition, useMemo, useCallback, memo } from "react";
-import { toggleHabitLog } from "@/app/actions/habits";
+import { useData } from "@/lib/demo-context";
 import { cn } from "@/lib/utils";
 import { getWeekDays, getDayLabel, formatDateKey, type DayLabel } from "@/lib/week";
 import { BarChart3, Check, Inbox, Pencil } from "lucide-react";
@@ -218,6 +218,7 @@ const HabitRow = memo(function HabitRow({
   onToggle,
   onHabitUpdated,
 }: HabitRowProps) {
+  const { service } = useData();
   const colors = getTopicColors(topicColor);
   const [isPending, startTransition] = useTransition();
   const [animatingCell, setAnimatingCell] = useState<string | null>(null);
@@ -238,7 +239,7 @@ const HabitRow = memo(function HabitRow({
       onToggle(habit.id, dateKey);
       startTransition(async () => {
         try {
-          await toggleHabitLog({ habitId: habit.id, date: dateKey });
+          await service.toggleHabitLog({ habitId: habit.id, date: dateKey });
         } catch {
           onToggle(habit.id, dateKey);
         }

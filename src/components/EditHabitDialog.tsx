@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { updateHabit } from "@/app/actions/habits";
+import { useData } from "@/lib/demo-context";
 import {
   Dialog,
   DialogContent,
@@ -41,6 +41,7 @@ export function EditHabitDialog({
   initialActiveDays,
   onSaved,
 }: EditHabitDialogProps) {
+  const { service, isDemo, refreshTopics } = useData();
   const [title, setTitle] = useState(initialTitle);
   const [activeDays, setActiveDays] = useState<DayLabel[]>(
     initialActiveDays as DayLabel[]
@@ -58,7 +59,8 @@ export function EditHabitDialog({
     if (!title.trim() || activeDays.length === 0) return;
     setLoading(true);
     try {
-      await updateHabit({ habitId, title: title.trim(), activeDays });
+      await service.updateHabit({ habitId, title: title.trim(), activeDays });
+      if (isDemo) await refreshTopics();
       onOpenChange(false);
       onSaved?.();
     } finally {

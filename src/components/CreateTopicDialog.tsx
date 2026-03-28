@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { createTopic } from "@/app/actions/topics";
+import { useData } from "@/lib/demo-context";
 import { TOPIC_COLORS } from "@/lib/colors";
 import {
   Dialog,
@@ -18,6 +18,7 @@ import { TOPIC_COLOR_MAP } from "@/lib/colors";
 import { cn } from "@/lib/utils";
 
 export function CreateTopicDialog() {
+  const { service, isDemo, refreshTopics } = useData();
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState("");
   const [color, setColor] = useState<string>("slate");
@@ -28,7 +29,8 @@ export function CreateTopicDialog() {
     if (!title.trim()) return;
     setLoading(true);
     try {
-      await createTopic({ title: title.trim(), color });
+      await service.createTopic({ title: title.trim(), color });
+      if (isDemo) await refreshTopics();
       setTitle("");
       setColor("slate");
       setOpen(false);

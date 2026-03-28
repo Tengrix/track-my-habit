@@ -7,7 +7,8 @@ import { WeekNavigator } from "@/components/WeekNavigator";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
-import { getHabitsWithLogs } from "@/app/actions/habits";
+import { DemoBanner } from "@/components/DemoBanner";
+import { DataProvider, useData } from "@/lib/demo-context";
 import {
   getWeekStart,
   getWeekEnd,
@@ -16,9 +17,10 @@ import {
 } from "@/lib/week";
 import { UserButton } from "@clerk/nextjs";
 import { ActivityDialog } from "@/components/ActivityDialog";
-import { Activity, BarChart3, Menu, X } from "lucide-react";
+import { Activity, BarChart3, LogIn, Menu, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { TopicNode, HabitData } from "@/lib/types";
+import Link from "next/link";
 
 const STORAGE_KEY = "track-my-habit-selected-habits";
 
@@ -28,9 +30,19 @@ function saveSelected(ids: Set<string>) {
 
 interface DashboardClientProps {
   topics: TopicNode[];
+  isDemo: boolean;
 }
 
-export function DashboardClient({ topics }: DashboardClientProps) {
+export function DashboardClient({ topics, isDemo }: DashboardClientProps) {
+  return (
+    <DataProvider isDemo={isDemo} initialTopics={topics}>
+      <DashboardInner isDemo={isDemo} />
+    </DataProvider>
+  );
+}
+
+function DashboardInner({ isDemo }: { isDemo: boolean }) {
+  const { service, topics, refreshTopics } = useData();
   const [selectedHabitIds, setSelectedHabitIds] = useState<Set<string>>(new Set());
   const [hydrated, setHydrated] = useState(false);
   const [weekStart, setWeekStart] = useState<Date | null>(null);
@@ -80,12 +92,12 @@ export function DashboardClient({ topics }: DashboardClientProps) {
     try {
       const start = formatDateKey(weekStart);
       const end = formatDateKey(getWeekEnd(weekStart));
-      const data = await getHabitsWithLogs(ids, start, end);
+      const data = await service.getHabitsWithLogs(ids, start, end);
       setHabits(data);
     } finally {
       setLoading(false);
     }
-  }, [selectedHabitIds, weekStart]);
+  }, [selectedHabitIds, weekStart, service]);
 
   useEffect(() => {
     fetchHabits();
@@ -107,7 +119,8 @@ export function DashboardClient({ topics }: DashboardClientProps) {
       next.delete(habitId);
       return next;
     });
-  }, []);
+    if (isDemo) refreshTopics();
+  }, [isDemo, refreshTopics]);
 
   const sections = useMemo(() => {
     const result: { id: string; title: string; color: string; habits: HabitData[] }[] = [];
@@ -172,6 +185,7 @@ export function DashboardClient({ topics }: DashboardClientProps) {
         </aside>
 
         <main className="flex flex-1 flex-col overflow-hidden">
+          {isDemo && <DemoBanner />}
           <header className="flex h-14 shrink-0 items-center justify-between border-b border-border/50 px-4 sm:px-6 gap-3 bg-background/80 backdrop-blur-md supports-[backdrop-filter]:bg-background/60">
             <Button
               variant="ghost"
@@ -203,13 +217,26 @@ export function DashboardClient({ topics }: DashboardClientProps) {
                 </TooltipTrigger>
                 <TooltipContent>Statistics</TooltipContent>
               </Tooltip>
-              <UserButton
-                appearance={{
-                  elements: {
-                    avatarBox: "h-7 w-7",
-                  },
-                }}
-              />
+              {isDemo ? (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground" asChild>
+                      <Link href="/sign-in">
+                        <LogIn className="h-4 w-4" />
+                      </Link>
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Sign in</TooltipContent>
+                </Tooltip>
+              ) : (
+                <UserButton
+                  appearance={{
+                    elements: {
+                      avatarBox: "h-7 w-7",
+                    },
+                  }}
+                />
+              )}
             </div>
           </header>
           <ActivityDialog

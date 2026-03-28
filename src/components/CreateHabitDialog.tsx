@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { createHabit } from "@/app/actions/habits";
+import { useData } from "@/lib/demo-context";
 import {
   Dialog,
   DialogContent,
@@ -31,6 +31,7 @@ const SHORT_LABELS: Record<DayLabel, string> = {
 };
 
 export function CreateHabitDialog({ topicId }: CreateHabitDialogProps) {
+  const { service, isDemo, refreshTopics } = useData();
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState("");
   const [activeDays, setActiveDays] = useState<DayLabel[]>([...ALL_DAYS]);
@@ -47,7 +48,8 @@ export function CreateHabitDialog({ topicId }: CreateHabitDialogProps) {
     if (!title.trim() || activeDays.length === 0) return;
     setLoading(true);
     try {
-      await createHabit({ topicId, title: title.trim(), activeDays });
+      await service.createHabit({ topicId, title: title.trim(), activeDays });
+      if (isDemo) await refreshTopics();
       setTitle("");
       setActiveDays([...ALL_DAYS]);
       setOpen(false);

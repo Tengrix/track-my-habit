@@ -24,10 +24,9 @@ import { CreateHabitDialog } from "@/components/CreateHabitDialog";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { ChevronRight, ChevronDown, Trash2, GripVertical } from "lucide-react";
-import { deleteTopic, reorderTopics, reorderHabits } from "@/app/actions/topics";
-import { deleteHabit } from "@/app/actions/habits";
 import { getTopicColors } from "@/lib/colors";
 import { cn } from "@/lib/utils";
+import { useData } from "@/lib/demo-context";
 import type { TopicNode } from "@/lib/types";
 
 interface TopicTreeProps {
@@ -38,6 +37,7 @@ interface TopicTreeProps {
 }
 
 export function TopicTree({ topics: serverTopics, selectedHabitIds, onToggleHabit, onHabitDeleted }: TopicTreeProps) {
+  const { service, isDemo, refreshTopics } = useData();
   const [optimisticTopics, setOptimisticTopics] = useState(serverTopics);
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -64,10 +64,11 @@ export function TopicTree({ topics: serverTopics, selectedHabitIds, onToggleHabi
   async function handleDeleteTopic(topicId: string, habitIds: string[]) {
     setDeletingId(topicId);
     try {
-      await deleteTopic(topicId);
+      await service.deleteTopic(topicId);
       for (const hId of habitIds) {
         onHabitDeleted?.(hId);
       }
+      if (isDemo) await refreshTopics();
     } finally {
       setDeletingId(null);
     }
@@ -76,8 +77,9 @@ export function TopicTree({ topics: serverTopics, selectedHabitIds, onToggleHabi
   async function handleDeleteHabit(habitId: string) {
     setDeletingId(habitId);
     try {
-      await deleteHabit(habitId);
+      await service.deleteHabit(habitId);
       onHabitDeleted?.(habitId);
+      if (isDemo) await refreshTopics();
     } finally {
       setDeletingId(null);
     }
@@ -94,7 +96,7 @@ export function TopicTree({ topics: serverTopics, selectedHabitIds, onToggleHabi
 
       const newOrder = arrayMove(optimisticTopics, oldIndex, newIndex);
       setOptimisticTopics(newOrder);
-      reorderTopics(newOrder.map((t) => t.id));
+      service.reorderTopics(newOrder.map((t) => t.id));
     },
     [optimisticTopics]
   );
@@ -184,6 +186,7 @@ function SortableTopicItem({
   sensors,
   onOptimisticHabitReorder,
 }: SortableTopicItemProps) {
+  const { service } = useData();
   const {
     attributes,
     listeners,
@@ -213,7 +216,7 @@ function SortableTopicItem({
 
       const newOrder = arrayMove(topic.habits, oldIndex, newIndex);
       onOptimisticHabitReorder(topic.id, newOrder);
-      reorderHabits(topic.id, newOrder.map((h) => h.id));
+      service.reorderHabits(topic.id, newOrder.map((h) => h.id));
     },
     [topic.id, topic.habits, onOptimisticHabitReorder]
   );

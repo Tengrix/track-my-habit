@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { ActivityHeatmap } from "@/components/ActivityHeatmap";
-import { getActivityStats } from "@/app/actions/stats";
+import { useData } from "@/lib/demo-context";
 import { Flame, Target, TrendingUp, CheckCircle2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { ActivityRange, ActivityStats } from "@/lib/types";
@@ -29,6 +29,7 @@ const RANGES: { value: ActivityRange; label: string }[] = [
 ];
 
 export function ActivityDialog({ open, onOpenChange, habitIds, title }: ActivityDialogProps) {
+  const { service } = useData();
   const [range, setRange] = useState<ActivityRange>("3m");
   const [stats, setStats] = useState<ActivityStats | null>(null);
   const [loading, setLoading] = useState(false);
@@ -40,12 +41,12 @@ export function ActivityDialog({ open, onOpenChange, habitIds, title }: Activity
     }
     setLoading(true);
     try {
-      const data = await getActivityStats({ habitIds, range });
+      const data = await service.getActivityStats({ habitIds, range });
       setStats(data);
     } finally {
       setLoading(false);
     }
-  }, [habitIds, range]);
+  }, [habitIds, range, service]);
 
   useEffect(() => {
     if (open) fetchStats();
